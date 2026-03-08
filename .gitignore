@@ -1,0 +1,17 @@
+# Конфиг с секретами — никогда не коммитить!
+config.py
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
