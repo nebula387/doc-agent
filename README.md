@@ -1,79 +1,55 @@
-# ⚖️ Doc Agent — Юридический ассистент
+# Doc Agent — Legal Document AI Assistant
 
-Telegram-бот для анализа юридических документов и консультаций по праву.
+A Telegram bot that analyzes legal documents (PDF, DOCX, TXT) and answers questions about their content using LLM reasoning. Upload a contract, ask questions — get structured analysis.
 
-## ✨ Возможности
+## Live Demo
 
-- 📄 Анализ документов (PDF, DOCX, TXT) — до 5 файлов одновременно
-- ⚖️ Вопросы по праву без документа
-- 🔍 Проверка информации в интернете (Tavily)
-- 🎤 Голосовой ввод (Groq Whisper)
-- 💎 Переключение между быстрой и умной моделью
-- 🧠 Память контекста (1 час)
+➡️ **[@Doc_helper](https://t.me/my_do_helper_bot)** — try it now
 
-## 🔄 Модели
+## What It Does
 
-| Команда | Модель | Когда использовать |
-|---------|--------|--------------------|
-| `/fast` (по умолч.) | `llama-4-maverick` | Обычные вопросы |
-| `/smart` | `gemini-2.5-pro` | Сложный анализ |
+- Upload up to 5 documents simultaneously (PDF, DOCX, TXT)
+- Ask questions about the documents in natural language
+- Cross-reference document content with live web search
+- Switch between fast and deep-reasoning models per request
+- Voice input support
 
-## 🔑 Необходимые ключи
+## Model Selection
 
-| Сервис | Ссылка | Tier |
-|--------|--------|------|
-| Telegram | [@BotFather](https://t.me/BotFather) | ✅ Бесплатно |
-| OpenRouter | [openrouter.ai](https://openrouter.ai) | ✅ Есть бесплатные |
-| Groq | [console.groq.com](https://console.groq.com) | ✅ Бесплатно |
-| Tavily | [tavily.com](https://tavily.com) | ✅ 1000/мес |
+| Mode | Model | Use case |
+|------|-------|----------|
+| `/fast` (default) | Llama 4 Maverick | Quick questions, summaries |
+| `/smart` | Gemini 2.5 Pro | Complex multi-doc analysis |
 
-## 🚀 Установка
+## Tech Stack
 
-```bash
-git clone https://github.com/ВАШ_НИК/doc-agent.git
-cd doc-agent
-pip install -r requirements.txt
-cp config.example.py config.py
-# заполни config.py
-python bot.py
-```
+- Python 3.10+ / aiogram 3.x
+- OpenRouter (Llama 4, Gemini 2.5 Pro)
+- Groq Whisper — voice input
+- Tavily — web search for fact-checking
+- PyMuPDF / python-docx — document parsing
 
-## 📁 Структура
-
+## Project Structure
 ```
 doc-agent/
-├── bot.py           # основная логика, команды
-├── llm.py           # запросы к моделям
-├── documents.py     # загрузка и хранение документов
-├── search.py        # поиск через Tavily
-├── voice.py         # распознавание речи
-├── config.py        # ключи (не коммитить!)
+├── bot.py           # commands, message flow
+├── llm.py           # model calls via OpenRouter
+├── documents.py     # document storage and parsing
+├── search.py        # Tavily web search
+├── voice.py         # speech-to-text
 ├── config.example.py
 └── requirements.txt
 ```
+## Quick Start
 
-## 💬 Использование
-
-**Работа с документами:**
+```bash
+git clone https://github.com/nebula387/doc-agent.git
+cd doc-agent
+pip install -r requirements.txt
+cp config.example.py config.py
+python bot.py
 ```
-1. Отправь PDF/DOCX/TXT
-2. Задавай вопросы по документу
-3. Нажми "Проверить в интернете" если нужно
-```
 
-**Команды:**
+## Related
 
-| Команда | Действие |
-|---------|----------|
-| `/smart` | Умная модель |
-| `/fast` | Быстрая модель |
-| `/model` | Текущая модель |
-| `/new` | Сбросить контекст |
-| `/docs` | Список документов |
-| `/deldoc имя.pdf` | Удалить файл |
-| `/cleardocs` | Удалить все |
-
-⚠️ *Не заменяет профессионального юриста*
-
-## 📄 Лицензия
-MIT
+- [pro-bot](https://github.com/nebula387/pro-bot) — multi-model AI assistant with smart routing
