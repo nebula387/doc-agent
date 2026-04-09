@@ -60,6 +60,24 @@ def reset_history(user_id: int):
 
 # ─── Форматирование ───────────────────────────────────────────────────────────
 
+def _convert_table(match: re.Match) -> str:
+    """Конвертирует markdown-таблицу в читаемый текст для Telegram."""
+    lines = match.group(0).strip().splitlines()
+    result = []
+    for line in lines:
+        # Пропускаем разделительные строки (| --- | :--: | и т.д.)
+        if re.match(r"^\|[\s\-:|]+\|", line):
+            continue
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        cells = [c for c in cells if c]
+        if not cells:
+            continue
+        if len(cells) == 2:
+            result.append(f"{cells[0]}: {cells[1]}")
+        else:
+            result.append("  |  ".join(cells))
+    return "\n".join(result)
+
 def md_to_html(text: str) -> str:
     text = text.replace("&", "&amp;")
     text = re.sub(
@@ -67,6 +85,8 @@ def md_to_html(text: str) -> str:
         lambda m: f"<pre><code>{m.group(2).strip()}</code></pre>",
         text, flags=re.DOTALL
     )
+    # Таблицы — до обработки звёздочек, чтобы не сломать <b> внутри ячеек
+    text = re.sub(r"(?:^\|.+\|[ \t]*\n?)+", _convert_table, text, flags=re.MULTILINE)
     text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
     text = re.sub(r"__(.+?)__", r"<b>\1</b>", text)
