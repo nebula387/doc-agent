@@ -1,14 +1,11 @@
-# Скопируй в config.py и заполни своими данными
-# cp config.example.py config.py
+import os
 
-TELEGRAM_TOKEN    = "ВАШ_TELEGRAM_TOKEN"
-OPENROUTER_API_KEY = "ВАШ_OPENROUTER_KEY"
-GROQ_API_KEY      = "ВАШ_GROQ_KEY"
-TAVILY_API_KEY    = "ВАШ_TAVILY_KEY"
-
-# Модели
-MODEL_FREE  = "meta-llama/llama-4-maverick"   # по умолчанию, бесплатная
-MODEL_SMART = "google/gemini-2.5-pro"         # по команде /smart, платная
+# Читаем из переменных окружения (для Hugging Face Spaces / продакшена)
+# Локально: задай переменные окружения или замени None на строки с ключами
+TELEGRAM_TOKEN     = os.getenv("TELEGRAM_TOKEN")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+GROQ_API_KEY       = os.getenv("GROQ_API_KEY")
+TAVILY_API_KEY     = os.getenv("TAVILY_API_KEY")
 
 # Имена бота в групповом чате
 BOT_NAMES = ["юрист", "бот", "агент"]

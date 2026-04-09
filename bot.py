@@ -6,8 +6,12 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.filters import CommandStart, Command
 
-from config import TELEGRAM_TOKEN, BOT_NAMES, MODEL_FREE, MODEL_SMART
-from llm import ask
+from config import TELEGRAM_TOKEN, BOT_NAMES
+from llm import ask, FREE_MODELS
+
+# Fast = самая стабильная (llama), Smart = самая мощная (nemotron-super)
+MODEL_FREE  = FREE_MODELS[1]   # meta-llama/llama-3.3-70b-instruct:free
+MODEL_SMART = FREE_MODELS[0]   # nvidia/nemotron-3-super-120b-a12b:free
 from search import legal_search
 from voice import transcribe
 from documents import (

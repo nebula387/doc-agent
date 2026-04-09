@@ -1,79 +1,107 @@
-# Doc Agent — Юридический ассистент
+# Doc Agent — Юридический ИИ-ассистент
 
-Telegram-бот для анализа юридических документов и консультаций по праву.
+Telegram-бот для анализа юридических документов и консультаций по праву. Работает на **цепочке бесплатных LLM** через OpenRouter — если одна модель недоступна, автоматически переключается на следующую.
 
-##  Возможности
+**Демо:** [@Doc_helper](https://t.me/my_do_helper_bot)
 
-- Анализ документов (PDF, DOCX, TXT) — до 5 файлов одновременно
-- Вопросы по праву без документа
-- Проверка информации в интернете (Tavily)
-- Голосовой ввод (Groq Whisper)
-- Переключение между быстрой и умной моделью
-- Память контекста (1 час)
+---
+
+## Возможности
+
+- **Анализ документов** — до 5 файлов одновременно (PDF, DOCX, TXT), вопросы по содержимому
+- **Консультации без документа** — отвечает на вопросы по законодательству
+- **Проверка в интернете** — кнопка под каждым ответом (поиск через Tavily)
+- **Голосовой ввод** — распознавание речи через Groq Whisper
+- **Память разговора** — контекст сохраняется 1 час, сброс через `/new`
+- **Автоматический fallback** — если модель перегружена, бот переключается на следующую
 
 ## Модели
 
-| Команда | Модель | Когда использовать |
-|---------|--------|--------------------|
-| `/fast` (по умолч.) | `llama-4-maverick` | Обычные вопросы |
-| `/smart` | `gemini-2.5-pro` | Сложный анализ |
+Все модели **бесплатные** через OpenRouter. При ошибке или rate limit бот пробует следующую по цепочке.
 
-## Необходимые ключи
+| Режим | Основная модель | Контекст |
+|-------|----------------|---------|
+| `/fast` (по умолч.) | `llama-3.3-70b-instruct:free` | 66K — самая стабильная |
+| `/smart` | `nemotron-3-super-120b-a12b:free` | 262K — глубокий анализ |
 
-| Сервис | Ссылка | Tier |
-|--------|--------|------|
-| Telegram | [@BotFather](https://t.me/BotFather) | ✅ Бесплатно |
-| OpenRouter | [openrouter.ai](https://openrouter.ai) | ✅ Есть бесплатные |
-| Groq | [console.groq.com](https://console.groq.com) | ✅ Бесплатно |
-| Tavily | [tavily.com](https://tavily.com) | ✅ 1000/мес |
+Полная цепочка: `nemotron-super` → `llama-3.3-70b` → `nemotron-nano` → `gemma-3-27b` → `openrouter/free`
 
-## Установка
+## Стек
+
+| Компонент | Сервис | Стоимость |
+|-----------|--------|-----------|
+| LLM | [OpenRouter](https://openrouter.ai) free tier | Бесплатно |
+| Распознавание речи | [Groq](https://console.groq.com) Whisper large-v3 | Бесплатно |
+| Веб-поиск | [Tavily](https://tavily.com) | 1000 req/мес бесплатно |
+| Telegram-фреймворк | aiogram 3.x | — |
+| Парсинг документов | PyMuPDF, python-docx | — |
+
+## Деплой на Hugging Face Spaces
+
+1. Форкни репозиторий или создай новый Space (Docker SDK)
+2. В настройках Space добавь **Secrets**:
+
+   | Секрет | Где получить |
+   |--------|-------------|
+   | `TELEGRAM_TOKEN` | [@BotFather](https://t.me/BotFather) |
+   | `OPENROUTER_API_KEY` | [openrouter.ai/keys](https://openrouter.ai/keys) |
+   | `GROQ_API_KEY` | [console.groq.com](https://console.groq.com) |
+   | `TAVILY_API_KEY` | [tavily.com](https://tavily.com) |
+
+3. Space запустится автоматически — бот использует long polling, webhook не нужен.
+
+> **Важно:** Free-tier Spaces на HF засыпают при неактивности. Для 24/7 работы нужен платный Space или внешний хостинг.
+
+## Локальный запуск
 
 ```bash
-git clone https://github.com/ВАШ_НИК/doc-agent.git
+git clone https://github.com/nebula387/doc-agent.git
 cd doc-agent
+
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
 pip install -r requirements.txt
-cp config.example.py config.py
-# заполни config.py
+
+# Задай переменные окружения (или скопируй config.example.py в config.py и заполни)
+export TELEGRAM_TOKEN=...
+export OPENROUTER_API_KEY=...
+export GROQ_API_KEY=...
+export TAVILY_API_KEY=...
+
 python bot.py
 ```
 
-## Структура
+## Структура проекта
 
 ```
 doc-agent/
-├── bot.py           # основная логика, команды
-├── llm.py           # запросы к моделям
-├── documents.py     # загрузка и хранение документов
-├── search.py        # поиск через Tavily
-├── voice.py         # распознавание речи
-├── config.py        # ключи (не коммитить!)
-├── config.example.py
+├── bot.py            # обработчики, команды, логика сообщений
+├── llm.py            # OpenRouter клиент, цепочка fallback-моделей
+├── documents.py      # хранение и парсинг PDF/DOCX/TXT
+├── search.py         # поиск через Tavily
+├── voice.py          # Groq Whisper, голосовой ввод
+├── config.py         # читает секреты из env vars (не коммитить реальные ключи!)
+├── config.example.py # шаблон для локальной разработки
 └── requirements.txt
 ```
 
-## Использование
+## Команды
 
-**Работа с документами:**
-```
-1. Отправь PDF/DOCX/TXT
-2. Задавай вопросы по документу
-3. Нажми "Проверить в интернете" если нужно
-```
-
-**Команды:**
-
-| Команда | Действие |
+| Команда | Описание |
 |---------|----------|
-| `/smart` | Умная модель |
-| `/fast` | Быстрая модель |
+| `/start` | Приветствие |
+| `/help` | Полная справка |
+| `/smart` | Переключить на мощную модель |
+| `/fast` | Переключить на быструю модель (по умолч.) |
 | `/model` | Текущая модель |
-| `/new` | Сбросить контекст |
-| `/docs` | Список документов |
-| `/deldoc имя.pdf` | Удалить файл |
-| `/cleardocs` | Удалить все |
+| `/new` | Сбросить контекст разговора |
+| `/docs` | Список загруженных документов |
+| `/deldoc имя.pdf` | Удалить конкретный файл |
+| `/cleardocs` | Удалить все документы |
 
- *Не заменяет профессионального юриста*
+> ⚠️ Бот предоставляет информацию общего характера. Не заменяет профессионального юриста.
 
 ## Лицензия
+
 MIT
