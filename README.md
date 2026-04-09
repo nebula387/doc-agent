@@ -1,3 +1,12 @@
+---
+title: Doc Agent
+emoji: ⚖️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # Doc Agent — Legal AI Assistant
 
 A Telegram bot that analyzes legal documents and answers questions about law using a **free LLM fallback chain** via OpenRouter. Upload a contract, get a structured breakdown, cross-check with live web search.
