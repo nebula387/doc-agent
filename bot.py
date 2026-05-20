@@ -32,7 +32,7 @@ MAX_HISTORY = 20             # больше истории — важен кон
 
 def get_state(user_id: int) -> dict:
     if user_id not in user_state:
-        user_state[user_id] = {"smart": False, "history": [], "last_time": time.time()}
+        user_state[user_id] = {"smart": False, "history": [], "last_time": time.time(), "last_query": ""}
     data = user_state[user_id]
     # Сброс истории по таймауту, режим модели сохраняем
     if time.time() - data["last_time"] > CONTEXT_TIMEOUT:
@@ -80,6 +80,7 @@ def _convert_table(match: re.Match) -> str:
 
 def md_to_html(text: str) -> str:
     text = text.replace("&", "&amp;")
+    text = text.replace("<", "&lt;").replace(">", "&gt;")
     text = re.sub(
         r"```(\w+)?\n?(.*?)```",
         lambda m: f"<pre><code>{m.group(2).strip()}</code></pre>",
@@ -268,7 +269,7 @@ async def handle_voice(message: Message):
     try:
         file = await bot.get_file(message.voice.file_id)
         audio_bytes = await bot.download_file(file.file_path)
-        text = transcribe(audio_bytes.read(), "voice.ogg")
+        text = await asyncio.to_thread(transcribe, audio_bytes.read(), "voice.ogg")
 
         if text.startswith("ERROR:") or not text:
             await status.delete()
@@ -295,8 +296,9 @@ async def handle_toggle_model(callback: CallbackQuery):
 
     # Обновляем кнопки у сообщения
     try:
+        last_q = get_state(user_id).get("last_query", "")
         await callback.message.edit_reply_markup(
-            reply_markup=response_keyboard(user_id, "")
+            reply_markup=response_keyboard(user_id, last_q)
         )
     except Exception:
         pass
@@ -312,7 +314,7 @@ async def handle_verify(callback: CallbackQuery):
     await callback.answer("Ищу в интернете...")
 
     status = await callback.message.reply("🔍 <i>Проверяю информацию...</i>", parse_mode="HTML")
-    results = legal_search(query)
+    results = await asyncio.to_thread(legal_search, query)
 
     await status.delete()
     await callback.message.reply(
@@ -339,12 +341,10 @@ async def process_message(message: Message, user_text: str):
     status = await message.reply(status_text, parse_mode="HTML")
     await bot.send_chat_action(message.chat.id, "typing")
 
+    get_state(user_id)["last_query"] = user_text
     save_message(user_id, "user", user_text)
-    response = ask(
-        user_text,
-        use_smart=smart,
-        history=history[:-1],
-        document=doc_text,
+    response = await asyncio.to_thread(
+        ask, user_text, use_smart=smart, history=history[:-1], document=doc_text
     )
     save_message(user_id, "assistant", response)
 

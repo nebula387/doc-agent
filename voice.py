@@ -12,14 +12,16 @@ def transcribe(audio_bytes: bytes, filename: str = "voice.ogg") -> str:
             tmp.write(audio_bytes)
             tmp_path = tmp.name
 
-        with open(tmp_path, "rb") as audio_file:
-            transcription = client.audio.transcriptions.create(
-                model="whisper-large-v3-turbo",
-                file=audio_file,
-                language="ru",
-                response_format="text"
-            )
-        os.unlink(tmp_path)
-        return transcription.strip()
+        try:
+            with open(tmp_path, "rb") as audio_file:
+                transcription = client.audio.transcriptions.create(
+                    model="whisper-large-v3-turbo",
+                    file=audio_file,
+                    language="ru",
+                    response_format="text"
+                )
+            return transcription.strip()
+        finally:
+            os.unlink(tmp_path)
     except Exception as e:
         return f"ERROR:{e}"

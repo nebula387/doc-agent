@@ -1,7 +1,7 @@
 aiogram==3.7.0
-openai
-tavily-python
-requests
-pymupdf
-python-docx
-groq
+openai==1.109.1
+tavily-python==0.5.0
+requests==2.33.1
+pymupdf==1.25.3
+python-docx==1.1.2
+groq==0.9.0
