@@ -60,6 +60,14 @@ def reset_history(user_id: int):
 
 # ─── Форматирование ───────────────────────────────────────────────────────────
 
+def normalize_llm_output(text: str) -> str:
+    """Конвертирует HTML-теги от LLM в markdown перед обработкой."""
+    text = re.sub(r"<strong>(.*?)</strong>", r"**\1**", text, flags=re.DOTALL)
+    text = re.sub(r"<em>(.*?)</em>", r"*\1*", text, flags=re.DOTALL)
+    text = re.sub(r"<b>(.*?)</b>", r"**\1**", text, flags=re.DOTALL)
+    text = re.sub(r"<i>(.*?)</i>", r"*\1*", text, flags=re.DOTALL)
+    return text
+
 def _convert_table(match: re.Match) -> str:
     """Конвертирует markdown-таблицу в читаемый текст для Telegram."""
     lines = match.group(0).strip().splitlines()
@@ -110,7 +118,7 @@ def split_long_message(text: str, limit: int = 4000) -> list[str]:
     return parts
 
 async def send_response(message: Message, text: str):
-    html = md_to_html(text)
+    html = md_to_html(normalize_llm_output(text))
     for part in split_long_message(html):
         try:
             await message.reply(part, parse_mode="HTML")
@@ -351,7 +359,7 @@ async def process_message(message: Message, user_text: str):
 
     # Кнопки: переключение модели + проверка в интернете
     keyboard = response_keyboard(user_id, user_text)
-    html = md_to_html(f"⚖️ {response}")
+    html = md_to_html(f"⚖️ {normalize_llm_output(response)}")
     parts = split_long_message(html)
 
     for i, part in enumerate(parts):
