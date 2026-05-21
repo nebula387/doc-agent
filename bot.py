@@ -80,7 +80,6 @@ def _convert_table(match: re.Match) -> str:
 
 def md_to_html(text: str) -> str:
     text = text.replace("&", "&amp;")
-    text = text.replace("<", "&lt;").replace(">", "&gt;")
     text = re.sub(
         r"```(\w+)?\n?(.*?)```",
         lambda m: f"<pre><code>{m.group(2).strip()}</code></pre>",
