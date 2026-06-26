@@ -2,7 +2,7 @@
 
 A Telegram bot that analyzes legal documents and answers questions about law using a **free LLM fallback chain** via OpenRouter. Upload a contract, get a structured breakdown, cross-check with live web search.
 
-**Live demo:** [@Doc_helper](https://t.me/doc_agent_hf_bot)
+**Try it:** [@Doc_helper](https://t.me/doc_agent_hf_bot)
 
 ---
 
